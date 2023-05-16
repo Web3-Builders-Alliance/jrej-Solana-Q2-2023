@@ -30,10 +30,10 @@ const mint = new PublicKey("ESaQmvDbgHtRHMRGatFMk2Xwj6e1zv2fVfHG3vRaDYHB");
             mint,
             ata.address,
             keypair,
-            1000n * token_decimals
+            10n * token_decimals
         )
         console.log(`Your mint txid: ${mintTx}`);
-    } catch(error) {
+    } catch (error) {
         console.log(`Oops, something went wrong: ${error}`)
     }
 })()
