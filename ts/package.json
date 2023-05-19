@@ -16,6 +16,7 @@
     "spl_metadata": "ts-node ./cluster1/spl_metadata.ts"
   },
   "dependencies": {
+    "@metaplex-foundation/js": "^0.19.3",
     "@metaplex-foundation/mpl-token-metadata": "^2.10.0",
     "@project-serum/anchor": "0.26.0",
     "@solana/spl-token": "^0.3.7",
