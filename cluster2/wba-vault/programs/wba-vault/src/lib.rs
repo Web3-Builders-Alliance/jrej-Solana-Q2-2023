@@ -94,9 +94,9 @@ pub mod wba_vault {
     pub fn withdraw_spl(ctx: Context<WithdrawSPL>, amount: u64) -> Result<()> {
         let cpi_program = ctx.accounts.token_program.to_account_info();
         let seeds = &[
-            "auth".as_bytes(),
-            &ctx.accounts.vault_state.key().clone().to_bytes(),
-            &[ctx.accounts.vault_state.vault_bump],
+            b"auth",
+            ctx.accounts.vault_state.to_account_info().key.as_ref(),
+            &[ctx.accounts.vault_state.auth_bump],
         ];
         let signer = &[&seeds[..]];
 
@@ -135,6 +135,7 @@ pub struct Initialize<'info> {
 pub struct Deposit<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
+    #[account(mut, has_one=owner)]
     pub vault_state: Account<'info, Vault>,
     ///CHECK: This is safe
     #[account(seeds=[b"auth", vault_state.key().as_ref()], bump)]
@@ -148,6 +149,7 @@ pub struct Deposit<'info> {
 pub struct Withdraw<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
+    #[account(mut, has_one=owner)]
     pub vault_state: Account<'info, Vault>,
     ///CHECK: This is safe
     #[account(seeds=[b"auth", vault_state.key().as_ref()], bump)]
@@ -161,7 +163,7 @@ pub struct Withdraw<'info> {
 pub struct DepositSPL<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
-    #[account(mut)]
+    #[account(mut, has_one=owner)]
     pub vault_state: Account<'info, Vault>,
     ///CHECK: This is safe
     #[account(seeds=[b"auth", vault_state.key().as_ref()], bump)]
@@ -182,7 +184,7 @@ pub struct DepositSPL<'info> {
 pub struct WithdrawSPL<'info> {
     #[account(mut)]
     pub owner: Signer<'info>,
-    #[account(mut)]
+    #[account(mut, has_one=owner)]
     pub vault_state: Account<'info, Vault>,
     ///CHECK: This is safe
     #[account(seeds=[b"auth", vault_state.key().as_ref()], bump)]
