@@ -1,7 +1,7 @@
 import * as anchor from "@coral-xyz/anchor";
 import { ASSOCIATED_TOKEN_PROGRAM_ID, TOKEN_PROGRAM_ID, createMint, getOrCreateAssociatedTokenAccount, mintTo } from '@solana/spl-token';
 import { WbaVault, IDL } from "../target/types/wba_vault";
-import wallet from '../wallet.json';
+import wallet from '../../../wallet.json';
 const { web3 } = anchor;
 
 describe("wba-vault", () => {
@@ -28,7 +28,7 @@ describe("wba-vault", () => {
     );
   }
 
-  it("aidrop", async () => {
+  it("airdrop", async () => {
     const signature = await provider.connection.requestAirdrop(keypair.publicKey, 4 * web3.LAMPORTS_PER_SOL);
     await confirmTransaction(signature);
   })

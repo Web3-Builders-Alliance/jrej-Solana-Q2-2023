@@ -2,7 +2,7 @@ use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{self, CloseAccount, Mint, Token, TokenAccount, TransferChecked};
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("Crw1qQTWTCArn2jWSj9LX2awTokZMRBAC3RhG4KZBnux");
 
 #[program]
 pub mod escrow {
@@ -17,7 +17,7 @@ pub mod escrow {
         initializer_amount: u64,
         taker_amount: u64,
     ) -> Result<()> {
-        ctx.accounts.escrow_state.initializer_key = *ctx.accounts.initializer.key;
+        ctx.accounts.escrow_state.initializer = *ctx.accounts.initializer.key;
         ctx.accounts.escrow_state.initializer_deposit_token_account = *ctx.accounts.initializer_deposit_token_account.to_account_info().key;
         ctx.accounts.escrow_state.initializer_receive_token_account = *ctx.accounts.initializer_receive_token_account.to_account_info().key;
         ctx.accounts.escrow_state.initializer_amount = initializer_amount;
@@ -83,6 +83,7 @@ pub struct Initialize<'info> {
     pub initializer: Signer<'info>,
     pub mint : Account<'info, Mint>,
 
+    ///CHECK: This is not dangerous because we don't read or write from this account
     #[account(seeds = [b"authority".as_ref()], bump)]
     pub vault_authority: AccountInfo<'info>,
     
@@ -96,7 +97,13 @@ pub struct Initialize<'info> {
     //Taker Token/Token B
     pub initializer_receive_token_account: Account<'info, TokenAccount>,
     
-    #[account(init, seeds=[b"state".as_ref(), &escrow_seed.to_le_bytes(), bump, payer = initializer, space = EscrowState::space()])]
+    #[account(
+        init, 
+        seeds=[b"state".as_ref(), &escrow_seed.to_le_bytes()], 
+        bump, 
+        payer = initializer, 
+        space = EscrowState::space()
+    )]
     pub escrow_state: Account<'info, EscrowState>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub token_program: Program<'info, Token>,
@@ -111,7 +118,7 @@ pub struct Cancel<'info> {
     #[account(mut)]
     pub vault: Account<'info, TokenAccount>,
 
-    ///CHECK: This is not dangerous
+    ///CHECK: This is not dangerous because we don't read or write from this account
     #[account(seeds = [b"authority".as_ref()], bump)]
     pub vault_authority: UncheckedAccount<'info>,
 
@@ -121,7 +128,7 @@ pub struct Cancel<'info> {
     
     #[account(
         mut,
-        constraint = escrow_state.initializer_key == *initializer.key,
+        constraint = escrow_state.initializer == *initializer.key,
         constraint = escrow_state.initializer_deposit_token_account == *initializer_deposit_token_account.to_account_info().key,
         close = initializer
     )]
@@ -132,9 +139,9 @@ pub struct Cancel<'info> {
 #[derive(Accounts)]
 pub struct Exchange<'info> {
     pub taker: Signer<'info>,
+    ///CHECK: This is not dangerous because we don't read or write from this account
     #[account(mut)]
-    pub initializer: UncheckedAccount<'info>,
-
+    pub initializer: AccountInfo<'info>,
     //Token A Mint
     pub initializer_deposit_token_mint: Account<'info, Mint>,
     //Token B Mint
@@ -158,15 +165,15 @@ pub struct Exchange<'info> {
         mut,
         constraint = escrow_state.initializer_deposit_token_account == *initializer_deposit_token_account.to_account_info().key,
         constraint = escrow_state.initializer_receive_token_account == *initializer_receive_token_account.to_account_info().key,
-        constraint = escrow_state.initializer_key == *initializer.key,
+        constraint = escrow_state.initializer == *initializer.key,
         close = initializer
     )]
     pub escrow_state: Account<'info, EscrowState>,
     #[account(mut)]
     pub vault: Account<'info, TokenAccount>,
-    ///CHECK: This is not dangerous
+    ///CHECK: This is not dangerous because we don't read or write from this account
     #[account(seeds = [b"authority".as_ref()], bump)]
-    pub vault_authority: UncheckedAccount<'info>,
+    pub vault_authority: AccountInfo<'info>,
     pub token_program: Program<'info, Token>,
 }   
 
@@ -175,7 +182,7 @@ pub struct EscrowState {
     pub random_seed: u64,
     pub initializer: Pubkey,
     pub initializer_deposit_token_account: Pubkey,
-    pub initializer_deposit_token_account: Pubkey,
+    pub initializer_receive_token_account: Pubkey,
     pub initializer_amount: u64,
     pub taker_amount: u64,
     pub vault_authority_bump: u8,
