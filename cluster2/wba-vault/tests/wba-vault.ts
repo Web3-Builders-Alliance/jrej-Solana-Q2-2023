@@ -114,7 +114,7 @@ describe("wba-vault", () => {
     );
     console.log(`Mint: ${mint.toBase58()}`);
 
-    const ata = await getOrCreateAssociatedTokenAccount(
+    const ownerAta = await getOrCreateAssociatedTokenAccount(
       connection,
       keypair,
       mint,
@@ -125,14 +125,13 @@ describe("wba-vault", () => {
       connection,
       keypair,
       mint,
-      ata.address,
+      ownerAta.address,
       keypair,
       100 * 1000000,
     )
     await confirmTransaction(mintTx);
     console.log(`mintTx: ${mintTx}`);
 
-    const ownerAta = await getOrCreateAssociatedTokenAccount(connection, keypair, mint, keypair.publicKey);
     const vaultAta = await getOrCreateAssociatedTokenAccount(connection, keypair, mint, vaultAuth, true);
 
     const txhash = await program.methods
